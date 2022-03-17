@@ -4,6 +4,7 @@ import logging
 import numpy as np
 from cvbot import base
 from cvbot import utils
+from cvbot.tasks.rng_tasks import RngMouseMove
 
 logging.basicConfig(level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -38,9 +39,9 @@ class WaitChop(base.Task):
         vines = self._find_vines(img)[450:500, 650:1350]
         indexs = np.nonzero(vines)
 
-        if len(indexs) == 0:
+        if len(indexs[0]) == 0:
             logging.info('something most have covered the game screen')
-            return
+            return False
 
         for i in range(10):
             sample = np.random.randint(0, len(indexs[0]))
@@ -51,7 +52,10 @@ class WaitChop(base.Task):
                 logging.info('clicking ' + str(x) + ' ' + str(y))
                 break
             logging.info('sampling failed... this time')
-
+        return True
 
 if __name__ == '__main__':
-    base.Bot([WaitChop()], cycle_delay=5, minutes=2400).main()
+    base.Bot([
+        WaitChop(),
+        # RngMouseMove(mst=600, gst=240)
+    ], cycle_delay=5, minutes=2400).main()
