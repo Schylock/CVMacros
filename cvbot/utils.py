@@ -63,20 +63,20 @@ def gen_hsv(img, target_colors, color_range=5, med_blur_range=21, color_blur_ran
 
 
 
-def key_press(key):
+def key_press(key, hold=0):
     pyautogui.keyDown(key)
+    if hold:
+        time.sleep(hold)
     #time.sleep(abs(np.random.normal(.1, .01, .5)))
     pyautogui.keyUp(key)
 
 
 def screenshot():
-        # Capture entire screen
     now = time.time()
 
     with mss() as sct:
         monitor = sct.monitors[1]
         sct_img = sct.grab(monitor)
-            # Convert to PIL/Pillow Image
 
         rgb = np.frombuffer(sct_img.rgb, np.uint8)
         rgb = rgb.reshape(sct_img.height, sct_img.width, 3)
@@ -114,3 +114,35 @@ def get_logger():
 
 def crop_array(arr, h, w):
     return arr[h[0]:h[1], w[0]:w[1]]
+
+def crop_array_v2(arr, h, w):
+    arr_x, arr_y, _ = arr.shape
+    y0, y1 = int(h[0] * arr_y), int(h[1] * arr_y)
+    x0, x1 = int(w[0] * arr_x), int(w[1] * arr_x)
+    return arr[x0:x1, y0:y1], y0, x0 
+
+def str_to_int(s):
+    return int(''.join([c for c in s if c.isnumeric()]))
+
+def click_template(img, template, button='left', 
+    base_x_offset=0, base_y_offset=0, 
+    template_x_offset=0, template_y_offset=0,
+    raise_if_missing=False
+):
+    locs = match_template(img, template)
+
+    if len(locs[0]) == 0:
+        if raise_if_missing:
+            raise Exception('Tryin to click something that dne')
+        else:
+            return False
+
+    x = locs[0][0] + base_x_offset + template_x_offset
+    y = locs[1][0] + base_y_offset + template_y_offset
+
+    pyautogui.moveTo(y, x)
+    pyautogui.click(button=button, duration=.2)
+    # pyautogui.click(y, x, button=button, duration=.5)
+    pyautogui.moveTo(5, 5)
+
+    return True

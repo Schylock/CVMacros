@@ -100,5 +100,7 @@ class Task(object):
         logger.info('running {}'.format(self.__str__()))
         return status
 
+    def _run(self, img):
+        return True
 
 
